@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package projectweb;
+package server;
 
 /**
  *
@@ -130,7 +130,7 @@ public class SClient extends Thread {
     public void SendMessage(byte[] msg) {
         try {
 
-            msg[msg.length - 1] = 0x14;
+            //msg[msg.length - 1] = 0x14;
             sOutput.write(msg);
         } catch (IOException err) {
             System.out.println("Exception writing to server: " + err);
@@ -239,9 +239,10 @@ public class SClient extends Thread {
 
             ResultSet rs = st.executeQuery(query);
             if (rs.next()) {
-                
+                int userID = rs.getInt("user_id"); // Kullanıcı id al
                 System.out.println("success");
-                String msg = "!!login+:"+ username;
+                String msg = "!!login+:"+ userID;
+                System.out.println(msg);
                 server.SendMessage(msg.getBytes(), this.id);
                 
             } else {

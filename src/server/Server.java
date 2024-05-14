@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package projectweb;
+package server;
 
 /**
  *
@@ -112,7 +112,7 @@ public class Server extends Thread {
 
     //mesaj gönderme fonksiyonu
     public void SendMessage(byte[] msg, int clientId) {
-        msg[msg.length - 1] = 0x14;
+        //msg[msg.length - 1] = 0x14;
         for (SClient sClient : this.clientList) {
             if (clientId == sClient.id) {
                 sClient.SendMessage(msg);
