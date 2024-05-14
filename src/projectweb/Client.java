@@ -30,12 +30,14 @@ public class Client implements Runnable {
     // port numarası
     private int port;
     boolean isListening = false;
+    fLogin loginFrame = null;
 
     //yapıcı metod
-    public Client(String server, int port, String username) {
+    public Client(String server, int port, String username, fLogin loginFrame) {
         this.username = username;
         this.server = server;
         this.port = port;
+        this.loginFrame = loginFrame;
 
     }
 
@@ -74,8 +76,12 @@ public class Client implements Runnable {
                 byte[] messageByte = new byte[1024];
                 int bytesRead = sInput.read(messageByte);
                 String message = new String(messageByte, 0, bytesRead);
-                //System.out.println(message);
-              
+                System.out.println("client side: "+message);
+                if(message.startsWith("!!login+")){
+                    int id = Integer.parseInt(message.split(":")[1]);
+                    loginFrame.login(id);
+                }
+                
                 //Frm_Client.lst_messagesFromServer_model.addElement(message);
 
             }

@@ -27,21 +27,24 @@ public class fMenu extends javax.swing.JFrame {
      * Creates new form fMenu
      */
     private static int currentUserID;
-
+    
     public fMenu(int currentUserID) {
         this.currentUserID = currentUserID;
         initComponents();
         // fMenu penceresini oluştur
+        
+        
         // users_projects tablosunu sorgulayarak kullanıcıya ait proje kimliklerini al
-        List<Integer> projectIDs = getProjectIDsForUser(currentUserID);
-        // Elde edilen proje kimliklerini kullanarak proje isimlerini al
-        List<String> projectNames = getProjectNames(projectIDs);
+        List<Integer> projectIDs = getProjectIDsForUser(currentUserID);  
+        // Elde edilen projeleri proje nesenesi oalrak listele
+        List<Project> projects = getProjects(projectIDs);
         // Elde edilen proje isimlerini JList'e atayarak göster
-        displayProjectNames(projectNames);
+        displayProjectNames(projects);
     }
 
     private List<Integer> getProjectIDsForUser(int userID) {
         List<Integer> projectIDs = new ArrayList<>();
+        
         Connection con = null;
         Statement st = null;
         ResultSet rs = null;
@@ -78,54 +81,65 @@ public class fMenu extends javax.swing.JFrame {
 
         return projectIDs;
     }
-
-    private List<String> getProjectNames(List<Integer> projectIDs) {
-        List<String> projectNames = new ArrayList<>();
+    
+    public Project getProjectInfo(int projectID) {
         Connection con = null;
         Statement st = null;
         ResultSet rs = null;
-
+        Project project = new Project();
         try {
             con = DriverManager.getConnection("jdbc:derby://localhost:1527/shopmedb;create=true");
             st = con.createStatement();
+            String query = "SELECT * FROM projects WHERE project_id = " + projectID;
+            rs = st.executeQuery(query);
 
-            for (int projectID : projectIDs) {
-                String query = "SELECT project_name FROM projects WHERE project_id = " + projectID;
-                rs = st.executeQuery(query);
-                if (rs.next()) {
-                    String projectName = rs.getString("project_name");
-                    projectNames.add(projectName);
-                }
+            if (rs.next()) {
+                String projectName = rs.getString("project_name");
+                String projectKey = rs.getString("project_key");
+                int adminID = rs.getInt("admin_id");
+                
+                
+                project.admin_id = adminID;
+                project.project_id = projectID;
+                project.project_key = projectKey;
+                project.project_name = projectName;
+                
+            } else {
+                System.out.println("Belirtilen proje kimliğine sahip proje bulunamadı.");
             }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             // Kaynakları kapat
             try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (st != null) {
-                    st.close();
-                }
-                if (con != null) {
-                    con.close();
-                }
+                if (rs != null) rs.close();
+                if (st != null) st.close();
+                if (con != null) con.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
-
-        return projectNames;
+        return project;
+    }
+    
+    List<Project> getProjects(List<Integer> projectIDs)
+    {
+        List<Project> projects = new ArrayList<>();
+        for(int projectID :  projectIDs)
+        {
+            projects.add(getProjectInfo(projectID));
+        }
+        return  projects;
     }
 
-    private void displayProjectNames(List<String> projectNames) {
+    private void displayProjectNames(List<Project> projects) {
         DefaultListModel<String> model = new DefaultListModel<>();
-        for (String projectName : projectNames) {
-            model.addElement(projectName);
+        for (Project project : projects) {
+            model.addElement(project.project_name);
         }
         list_projects.setModel(model);
     }
+    
 
     /**
      * This method is called from within the constructor to initialize the form.

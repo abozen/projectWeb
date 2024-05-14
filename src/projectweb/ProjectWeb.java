@@ -21,23 +21,11 @@ public class ProjectWeb {
     /**
      * @param args the command line arguments
      */
+    static Server server = new Server();
     public static void main(String[] args) {
-        // TODO code application logic here
-        try{
-            
-            Connection con = DriverManager.getConnection("jdbc:derby://localhost:1527/shopmedb;create=true");
-            Statement st = con.createStatement();
-            String query = "SELECT * FROM users WHERE user_id = 1 AND password = '123'";
-
-            ResultSet rs = st.executeQuery(query);
-            if (rs.next()) 
-                System.out.println("success");
-            else
-                System.out.println("fail");
-            
-        }catch(HeadlessException | SQLException E){
-            System.out.println("error: " + E.getMessage());
-        }
+        int port = 5002;
+        server.Create(port);
+        server.Listen();
     }
     
 }

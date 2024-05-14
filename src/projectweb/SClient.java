@@ -8,10 +8,16 @@ package projectweb;
  *
  * @author abozen
  */
+import java.awt.HeadlessException;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -82,11 +88,33 @@ public class SClient extends Thread {
                     String log = username + " -> " + message;
                     server.SendBroadCastMessage(log.getBytes());
                     //Frm_Server.lst_messagesFromClient_model.addElement(log);//this.socket.getPort() + "->" + message); 
-                } else if(message.startsWith("!!PRIVATE")){
+                } else if (message.startsWith("!!PRIVATE")) {
                     String messageTo = message.split(":")[1];
                     message = message.substring(11 + messageTo.length());
                     message = (String) username + " -> " + message;
                     server.SendMessage(message.getBytes(), findIdFromUsername(messageTo));
+                } else if (message.startsWith("!!QUERY")) { // !!QUERY:register:0:aburo:123
+                    String type = message.split(":")[1];
+                    switch (type) {
+                        case "register":
+                            registerQuery(message);
+                            break;
+                        case "login":
+                            loginQuery(message);
+                            break;
+                        case "projectList":
+                            projectListQuery(message);
+                            break;
+                        case "createProject":
+                            createProjectQuery(message);
+                            break;
+                        case "joinProject":
+                            joinProjectQuery(message);
+                            break;
+                        default:
+                            break;
+
+                    }
                 }
 
             }
@@ -98,7 +126,7 @@ public class SClient extends Thread {
 
     }
 
-    //mesaj gönderme fonksiyonu
+//mesaj gönderme fonksiyonu
     public void SendMessage(byte[] msg) {
         try {
 
@@ -120,19 +148,126 @@ public class SClient extends Thread {
             System.out.println("disconnected");
             //Frm_Server.lst_messagesFromClient_model.addElement(" !! " + username + " has left");
             //Frm_Server.lst_clients_model.removeElement(username);
+
         } catch (IOException ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Server.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    int findIdFromUsername(String username)
-    {
+
+    int findIdFromUsername(String username) {
         for (SClient sClient : server.clientList) {
-            if (username.equals(sClient.username) ) {
+            if (username.equals(sClient.username)) {
                 return sClient.id;
             }
         }
         return -1; //error
+    }
+
+    void registerQuery(String message) {
+
+        String[] splittedMsg = message.split(":");
+        int id = Integer.parseInt(splittedMsg[2]);
+        String username = splittedMsg[3];
+        String password = splittedMsg[4];
+        
+        Connection con = null;
+        Statement st = null;
+
+        try {
+            // Bağlantıyı oluştur
+            con = DriverManager.getConnection("jdbc:derby://localhost:1527/shopmedb;create=true");
+            st = con.createStatement();
+
+            // Aynı kullanıcı adıyla kayıtlı bir kullanıcının olup olmadığını kontrol et
+            
+            String checkQuery = "SELECT * FROM users WHERE username = '" + username + "'";
+            ResultSet checkResult = st.executeQuery(checkQuery);
+
+            if (checkResult.next()) {
+                System.out.println("Bu kullanıcı adı zaten mevcut.");
+            } else {
+                // Mevcut en yüksek kullanıcı kimliğini al
+                String maxIDQuery = "SELECT MAX(user_id) FROM users";
+                ResultSet rs = st.executeQuery(maxIDQuery);
+                int maxID = 0;
+                if (rs.next()) {
+                    maxID = rs.getInt(1); // En yüksek kullanıcı kimliğini al
+                    System.out.println("Max user_id: " + maxID);
+                } else {
+                    System.out.println("ResultSet boş.");
+                }
+
+                // Kullanıcıyı ekle
+                String insertQuery = "INSERT INTO users (user_id, username, password) VALUES (" + (++maxID) + ", '" + username + "', '" + password + "')";
+                int rowsAffected = st.executeUpdate(insertQuery);
+
+                if (rowsAffected > 0) {
+                    System.out.println("Kullanıcı başarıyla eklendi.");
+                } else {
+                    System.out.println("Kullanıcı eklenemedi.");
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("error: " + e.getMessage());
+        } finally {
+            // Kaynakları kapat
+            try {
+                if (st != null) {
+                    st.close();
+                }
+                if (con != null) {
+                    con.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    private void loginQuery(String message) {
+        String[] splittedMsg = message.split(":");
+        String username = splittedMsg[2];
+        String password = splittedMsg[3];
+         try {
+
+            Connection con = DriverManager.getConnection("jdbc:derby://localhost:1527/shopmedb;create=true");
+            Statement st = con.createStatement();
+            String query = "SELECT * FROM users WHERE username = '" + username
+                    + "' AND password = '" + password + "'";
+
+            ResultSet rs = st.executeQuery(query);
+            if (rs.next()) {
+                
+                System.out.println("success");
+                String msg = "!!login+:"+ username;
+                server.SendMessage(msg.getBytes(), this.id);
+                
+            } else {
+                System.out.println("fail");
+            }
+
+        } catch (HeadlessException | SQLException E) {
+            System.out.println("error: " + E.getMessage());
+        }
+
+    }
+
+    private void projectListQuery(String message) {
+        String[] splittedMsg = message.split(":");
+        String username = splittedMsg[2];
+    }
+
+    private void createProjectQuery(String message) {
+        String[] splittedMsg = message.split(":");
+        String username = splittedMsg[2];
+    }
+
+    private void joinProjectQuery(String message) {
+        String[] splittedMsg = message.split(":");
+        String username = splittedMsg[2];
+        String key = splittedMsg[3];
     }
 
 }

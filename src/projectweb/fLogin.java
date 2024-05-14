@@ -27,10 +27,21 @@ public class fLogin extends javax.swing.JFrame {
     static boolean savedShow = false;
     static boolean isChecked1 = false;
     static boolean isChecked2 = false;
+    String ip = "192.168.1.108";
+    int port = 5002;
+    Client client = new Client(ip, port, "XX", this);
 
     public fLogin() {
         initComponents();
+        client.ConnectToServer();
         //login_list.setVisible(savedShow);
+    }
+    
+    public void login(int id)
+    {
+        fMenu menuFrame = new fMenu(id);
+        menuFrame.setVisible(true);
+        this.setVisible(false);
     }
 
     /**
@@ -178,85 +189,14 @@ public class fLogin extends javax.swing.JFrame {
     }//GEN-LAST:event_jCheckBox2ActionPerformed
 
     private void login_b1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_login_b1ActionPerformed
-
-        try {
-
-            Connection con = DriverManager.getConnection("jdbc:derby://localhost:1527/shopmedb;create=true");
-            Statement st = con.createStatement();
-            String query = "SELECT * FROM users WHERE username = '" + login_txt1.getText()
-                    + "' AND password = '" + login_psw.getText() + "'";
-
-            ResultSet rs = st.executeQuery(query);
-            if (rs.next()) {
-                currentUserID = rs.getInt("user_id"); // user_id sütununu al ve currentUserID'ye ata    
-                System.out.println("success");
-                fMenu menuFrame = new fMenu(currentUserID);
-                menuFrame.setVisible(true);
-                this.dispose();
-            } else {
-                System.out.println("fail");
-            }
-
-        } catch (HeadlessException | SQLException E) {
-            System.out.println("error: " + E.getMessage());
-        }
+        String msg = "!!QUERY:login:"+ login_txt1.getText() + ":" + login_psw.getText();
+        client.SendMessage(msg.getBytes());
 
     }//GEN-LAST:event_login_b1ActionPerformed
 
     private void register_b1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_register_b1ActionPerformed
-        Connection con = null;
-        Statement st = null;
-
-        try {
-            // Bağlantıyı oluştur
-            con = DriverManager.getConnection("jdbc:derby://localhost:1527/shopmedb;create=true");
-            st = con.createStatement();
-
-            // Aynı kullanıcı adıyla kayıtlı bir kullanıcının olup olmadığını kontrol et
-            String username = register_txt.getText();
-            String checkQuery = "SELECT * FROM users WHERE username = '" + username + "'";
-            ResultSet checkResult = st.executeQuery(checkQuery);
-
-            if (checkResult.next()) {
-                System.out.println("Bu kullanıcı adı zaten mevcut.");
-            } else {
-                // Mevcut en yüksek kullanıcı kimliğini al
-                String maxIDQuery = "SELECT MAX(user_id) FROM users";
-                ResultSet rs = st.executeQuery(maxIDQuery);
-                int maxID = 0;
-                if (rs.next()) {
-                    maxID = rs.getInt(1); // En yüksek kullanıcı kimliğini al
-                    System.out.println("Max user_id: " + maxID);
-                } else {
-                    System.out.println("ResultSet boş.");
-                }
-
-                // Kullanıcıyı ekle
-                String insertQuery = "INSERT INTO users (user_id, username, password) VALUES (" + (++maxID) + ", '" + username + "', '" + register_psw.getText() + "')";
-                int rowsAffected = st.executeUpdate(insertQuery);
-
-                if (rowsAffected > 0) {
-                    System.out.println("Kullanıcı başarıyla eklendi.");
-                } else {
-                    System.out.println("Kullanıcı eklenemedi.");
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("error: " + e.getMessage());
-        } finally {
-            // Kaynakları kapat
-            try {
-                if (st != null) {
-                    st.close();
-                }
-                if (con != null) {
-                    con.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-
+        String msg = "!!QUERY:register:"+ register_txt.getText() + ":" + register_psw.getText();
+        client.SendMessage(msg.getBytes());
     }//GEN-LAST:event_register_b1ActionPerformed
 
     /**
