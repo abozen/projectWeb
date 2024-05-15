@@ -29,6 +29,7 @@ public class fMenu extends javax.swing.JFrame {
     private static int currentUserID;
     static fLogin loginFrame = null;
     static Client client = null;
+    String[][] projectInfos;
 
     public fMenu(int currentUserID, fLogin loginFrame, Client client) {
         this.currentUserID = currentUserID;
@@ -40,7 +41,8 @@ public class fMenu extends javax.swing.JFrame {
 
     }
 
-    public void setProjectList(DefaultListModel<String> model) {
+    public void setProjectList(DefaultListModel<String> model, String[][] projectInfos) {
+        this.projectInfos = projectInfos;
         list_projects.setModel(model);
     }
 
@@ -126,6 +128,11 @@ public class fMenu extends javax.swing.JFrame {
         getContentPane().add(b_joinProject1, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 270, 120, 30));
 
         b_openProject1.setText("Open Project");
+        b_openProject1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                b_openProject1ActionPerformed(evt);
+            }
+        });
         getContentPane().add(b_openProject1, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 260, 120, 30));
 
         jLabel2.setText("PROJECTS");
@@ -168,6 +175,29 @@ public class fMenu extends javax.swing.JFrame {
 //        this.validate();
 //        this.repaint();
     }//GEN-LAST:event_b_joinProject1ActionPerformed
+
+    private void b_openProject1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_b_openProject1ActionPerformed
+        // TODO add your handling code here:
+        int selectedProject = -1;
+        selectedProject = list_projects.getSelectedIndex();
+        if(selectedProject == -1)
+        {
+            String log = "Yukarıdaki listeden proje seçmeniz gerekmektedir.";
+            JOptionPane.showMessageDialog(null, log);
+            return;
+        }
+        int projectID = Integer.parseInt(projectInfos[selectedProject][0]);
+        String projectKey = projectInfos[selectedProject][1];
+        String projectName = projectInfos[selectedProject][2];
+        int adminID = Integer.parseInt(projectInfos[selectedProject][3]);
+        
+        fProject projectFrame = new fProject(currentUserID, this.client, projectID, projectName);
+        client.setProjectFrame(projectFrame);
+        projectFrame.setVisible(true);
+        this.setVisible(false);
+        
+        
+    }//GEN-LAST:event_b_openProject1ActionPerformed
 
     /**
      * @param args the command line arguments

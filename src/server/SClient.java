@@ -18,6 +18,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -113,6 +115,9 @@ public class SClient extends Thread {
                         case "joinProject":
                             joinProjectQuery(message);
                             break;
+                        case "activeMembers":
+                            activeMembersQuery(message);
+                            break;
                         default:
                             break;
 
@@ -154,6 +159,16 @@ public class SClient extends Thread {
         } catch (IOException ex) {
             Logger.getLogger(Server.class
                     .getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public boolean isClientConnected() {
+        if (socket.isConnected() && !socket.isClosed()) {
+            System.out.println("Socket bağlı.");
+            return true;
+        } else {
+            System.out.println("Socket bağlı değil.");
+            return false;
         }
     }
 
@@ -240,7 +255,9 @@ public class SClient extends Thread {
 
             ResultSet rs = st.executeQuery(query);
             if (rs.next()) {
+                
                 int userID = rs.getInt("user_id"); // Kullanıcı id al
+                this.id = userID;
                 System.out.println("success");
                 String msg = "!!login+:" + userID;
                 System.out.println(msg);
@@ -281,8 +298,35 @@ public class SClient extends Thread {
         int userID = Integer.parseInt(splittedMsg[2]);
         String key = splittedMsg[3];
         boolean isJoined = sql.joinProject(key, userID);
-        String sendMsg = "!!joinProject:"+isJoined;
+        String sendMsg = "!!joinProject:" + isJoined;
         server.SendMessage(sendMsg.getBytes(), this.id);
+    }
+
+    private void activeMembersQuery(String message) {
+        String[] splittedMsg = message.split(":");
+        int projectID = Integer.parseInt(splittedMsg[2]);
+        ArrayList<Integer> userIDs = sql.getUserIDsForProject(projectID);
+        ArrayList<Integer> activeUserIDs = new ArrayList<Integer>();
+        for (int id : userIDs) {
+            for (SClient client : server.clientList) {
+                if(id == client.id && client.isClientConnected())
+                {
+                    activeUserIDs.add(id);
+                }
+            }
+        }
+        String names = "";
+        for(int id : activeUserIDs)
+        {
+            names += sql.getUsername(id);
+            names += ":";
+        }
+        
+        String sendMsg = "!!activeMembers:"+names;
+        server.SendMessage(sendMsg.getBytes(), this.id);
+        //String activeMembers = sql.getUsernamesForProject(projectID);
+       // String sendMsg = "!!activeMembers:"+activeMembers;
+        //server.SendMessage(sendMsg.getBytes(), this.id);
     }
 
 }

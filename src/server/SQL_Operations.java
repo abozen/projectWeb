@@ -13,6 +13,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class SQL_Operations {
@@ -354,5 +355,92 @@ public class SQL_Operations {
                 e.printStackTrace();
             }
         }
+    }
+
+    public ArrayList<Integer> getUserIDsForProject(int projectID) {
+        Connection con = null;
+        Statement st = null;
+        ResultSet rs = null;
+
+        try {
+            con = DriverManager.getConnection("jdbc:derby://localhost:1527/shopmedb;create=true");
+            st = con.createStatement();
+
+            // Belirli bir proje kimliği ile ilişkili kullanıcı kimliklerini al
+            String query = "SELECT user_id FROM users_projects WHERE project_id = " + projectID;
+            rs = st.executeQuery(query);
+
+            // Kullanıcı kimliklerini bir int dizisine ekleyin
+            
+            ArrayList<Integer> userIDs = new ArrayList<Integer>();
+            
+            while (rs.next()) {
+                int userID = rs.getInt("user_id");
+                userIDs.add(userID);
+            }
+            return userIDs;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            // Kaynakları kapat
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (st != null) {
+                    st.close();
+                }
+                if (con != null) {
+                    con.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        // Hata durumunda veya sonuç bulunamadığında null döndür
+        return null;
+    }
+
+
+
+    public String getUsername(int userID) {
+        String username = null;
+
+        Connection con = null;
+        Statement st = null;
+        ResultSet rs = null;
+
+        try {
+            con = DriverManager.getConnection("jdbc:derby://localhost:1527/shopmedb;create=true");
+            st = con.createStatement();
+
+            // Belirli bir user_id ile ilişkili kullanıcı adını al
+            String query = "SELECT username FROM users WHERE user_id = " + userID;
+            rs = st.executeQuery(query);
+
+            // Kullanıcı adını al
+            if (rs.next()) {
+                username = rs.getString("username");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            // Kaynakları kapat
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (st != null) {
+                    st.close();
+                }
+                if (con != null) {
+                    con.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return username;
     }
 }

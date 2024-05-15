@@ -4,6 +4,8 @@
  */
 package projectweb;
 
+import javax.swing.DefaultListModel;
+
 /**
  *
  * @author abozen
@@ -13,8 +15,33 @@ public class fProject extends javax.swing.JFrame {
     /**
      * Creates new form fProject
      */
-    public fProject() {
+    static int currentUserID;
+    static Client client;
+    static int projectID;
+    static String projectName;
+    
+    public fProject(int currentUserID, Client client, int projectID, String projectName) {
         initComponents();
+        this.currentUserID = currentUserID;
+        this.client = client;
+        this.projectID = projectID;
+        this.projectName = projectName;
+        listActiveMembers();
+    }
+    
+    private void listActiveMembers()
+    {
+        String message = "!!QUERY:activeMembers:"+ projectID;
+        client.SendMessage(message.getBytes());
+    }
+    
+    public void setActiveMembers(String[] usernames){
+        System.out.println("modeling");
+        DefaultListModel<String> model = new DefaultListModel<>();
+        for (int i = 0; i < usernames.length; i++) {
+            model.addElement(usernames[i]);
+        }
+        activeMembers_list.setModel(model);
     }
 
     /**
@@ -28,15 +55,15 @@ public class fProject extends javax.swing.JFrame {
 
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList<>();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jList2 = new javax.swing.JList<>();
+        activeMembers_list = new javax.swing.JList<>();
         jScrollPane3 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
+        chat_txt = new javax.swing.JTextArea();
         b_send = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        chatbox = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -46,29 +73,20 @@ public class fProject extends javax.swing.JFrame {
         jLabel1.setToolTipText("");
         getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 20, 190, 20));
 
-        jList1.setModel(new javax.swing.AbstractListModel<String>() {
+        activeMembers_list.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
-        jScrollPane1.setViewportView(jList1);
+        jScrollPane1.setViewportView(activeMembers_list);
 
         getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 80, 110, 180));
 
-        jList2.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
-        jScrollPane2.setViewportView(jList2);
+        chat_txt.setColumns(20);
+        chat_txt.setRows(5);
+        jScrollPane3.setViewportView(chat_txt);
 
-        getContentPane().add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 80, 250, 180));
-
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane3.setViewportView(jTextArea1);
-
-        getContentPane().add(jScrollPane3, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 270, 250, 70));
+        getContentPane().add(jScrollPane3, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 270, 250, 60));
 
         b_send.setText("Send Message");
         getContentPane().add(b_send, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 350, -1, -1));
@@ -81,6 +99,15 @@ public class fProject extends javax.swing.JFrame {
 
         jButton1.setText("Send Private Message");
         getContentPane().add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 280, -1, -1));
+
+        chatbox.setEditable(false);
+        chatbox.setBackground(new java.awt.Color(223, 222, 222));
+        chatbox.setColumns(20);
+        chatbox.setRows(5);
+        chatbox.setDisabledTextColor(new java.awt.Color(252, 196, 196));
+        jScrollPane4.setViewportView(chatbox);
+
+        getContentPane().add(jScrollPane4, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 90, 250, 170));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -115,22 +142,22 @@ public class fProject extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new fProject().setVisible(true);
+                new fProject(currentUserID, client, projectID, projectName).setVisible(true);
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JList<String> activeMembers_list;
     private javax.swing.JButton b_send;
+    private javax.swing.JTextArea chat_txt;
+    private javax.swing.JTextArea chatbox;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JList<String> jList1;
-    private javax.swing.JList<String> jList2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JScrollPane jScrollPane4;
     // End of variables declaration//GEN-END:variables
 }

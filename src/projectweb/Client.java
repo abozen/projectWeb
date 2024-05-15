@@ -35,9 +35,11 @@ public class Client implements Runnable {
     
     fLogin loginFrame = null;
     fMenu menuFrame = null;
+    fProject projectFrame = null;
     
     String[][] projectInfos = null;
     public DefaultListModel<String> listModel;
+   
     
 
     //yapıcı metod
@@ -52,6 +54,11 @@ public class Client implements Runnable {
     public void setMenuFrame(fMenu menuFrame)
     {
        this.menuFrame = menuFrame;
+    }
+    
+    public void setProjectFrame(fProject projectFrame)
+    {
+        this.projectFrame = projectFrame;
     }
 
     // client başlatma
@@ -98,7 +105,7 @@ public class Client implements Runnable {
                     String projectMsg = message.substring(14);
                     projectInfos = getProjectInfos(projectMsg);
                     listModel = getProjectList(projectInfos);
-                    menuFrame.setProjectList(listModel);
+                    menuFrame.setProjectList(listModel, projectInfos);
                 }else if(message.startsWith("!!createProject"))
                 {
                     String[] splittedMsg = message.split(":");
@@ -111,6 +118,14 @@ public class Client implements Runnable {
                     if(splittedMsg[1].equals("true"))
                         isJoined = true;
                     menuFrame.joinedProject(isJoined);
+                }else if(message.startsWith("!!activeMembers"))
+                {
+                    String[] splittedMsg = message.split(":");
+                    String[] names = new String[splittedMsg.length - 1];
+                    for (int i = 0; i < names.length; i++) {
+                        names[i] = splittedMsg[i + 1];
+                    }
+                    projectFrame.setActiveMembers(names);
                 }
                 
                 //Frm_Client.lst_messagesFromServer_model.addElement(message);

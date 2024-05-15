@@ -22,11 +22,14 @@ public class ProjectWeb {
     /**
      * @param args the command line arguments
      */
-    static Server server = new Server();
+    
     public static void main(String[] args) {
-        int port = 5002;
-        server.Create(port);
-        server.Listen();
+        String asd = "a:d:g:";
+        String[] s = asd.split(":");
+        System.out.println(s.length);
+        for (int i = 0; i < s.length; i++) {
+            System.out.println(s[i]);
+        }
     }
     
 }
