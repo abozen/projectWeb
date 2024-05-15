@@ -278,8 +278,11 @@ public class SClient extends Thread {
 
     private void joinProjectQuery(String message) {
         String[] splittedMsg = message.split(":");
-        String username = splittedMsg[2];
+        int userID = Integer.parseInt(splittedMsg[2]);
         String key = splittedMsg[3];
+        boolean isJoined = sql.joinProject(key, userID);
+        String sendMsg = "!!joinProject:"+isJoined;
+        server.SendMessage(sendMsg.getBytes(), this.id);
     }
 
 }

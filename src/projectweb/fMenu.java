@@ -49,6 +49,19 @@ public class fMenu extends javax.swing.JFrame {
         JOptionPane.showMessageDialog(null, log);
         resetProjectList();
     }
+    
+    public void joinedProject(boolean isJoined)
+    {
+        if (isJoined) {
+            String log = "Projeye başarıyla katıldınız.";
+            JOptionPane.showMessageDialog(null, log);
+            resetProjectList();
+        } else {
+            String log = "Belirtilen anahtara sahip proje bulunamadı.";
+            JOptionPane.showMessageDialog(null, log);
+        }
+        
+    }
 
     public void resetProjectList() {
         String listMessage = "!!QUERY:projectList:" + currentUserID;
@@ -127,31 +140,33 @@ public class fMenu extends javax.swing.JFrame {
 
     private void b_newProject1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_b_newProject1ActionPerformed
         // TODO add your handling code here:
-        ProjectCreation pc = new ProjectCreation();
+        
         String projectName = txt_projectName.getText();
         String message = "!!QUERY:createProject:" + currentUserID + ":" + projectName;
         client.SendMessage(message.getBytes());
 
-        //String projectKey = pc.createNewProject(projectName, currentUserID);
-        //String log = "A project named " + projectName + " is created. Project Key is : " + projectKey;
-        //JOptionPane.showMessageDialog(null, log);
+       
 
     }//GEN-LAST:event_b_newProject1ActionPerformed
 
     private void b_joinProject1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_b_joinProject1ActionPerformed
         // TODO add your handling code here:
-        ProjectJoin pj = new ProjectJoin();
-        boolean isJoined = pj.joinProject(txt_key.getText(), currentUserID);
-        if (isJoined) {
-            String log = "Projeye başarıyla katıldınız.";
-            JOptionPane.showMessageDialog(null, log);
-        } else {
-            String log = "Belirtilen anahtara sahip proje bulunamadı.";
-            JOptionPane.showMessageDialog(null, log);
-        }
-        this.invalidate();
-        this.validate();
-        this.repaint();
+        String projectKey = txt_key.getText();
+        String message = "!!QUERY:joinProject:"+currentUserID+ ":"+ projectKey;
+        client.SendMessage(message.getBytes());
+        
+//        ProjectJoin pj = new ProjectJoin();
+//        boolean isJoined = pj.joinProject(txt_key.getText(), currentUserID);
+//        if (isJoined) {
+//            String log = "Projeye başarıyla katıldınız.";
+//            JOptionPane.showMessageDialog(null, log);
+//        } else {
+//            String log = "Belirtilen anahtara sahip proje bulunamadı.";
+//            JOptionPane.showMessageDialog(null, log);
+//        }
+//        this.invalidate();
+//        this.validate();
+//        this.repaint();
     }//GEN-LAST:event_b_joinProject1ActionPerformed
 
     /**

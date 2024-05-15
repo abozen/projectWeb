@@ -105,6 +105,12 @@ public class Client implements Runnable {
                     String projectName = splittedMsg[1];
                     String projectKey = splittedMsg[2];
                     menuFrame.projectCreated(projectName, projectKey);
+                }else if(message.startsWith("!!joinProject")){
+                    String[] splittedMsg = message.split(":");
+                    boolean isJoined = false;
+                    if(splittedMsg[1].equals("true"))
+                        isJoined = true;
+                    menuFrame.joinedProject(isJoined);
                 }
                 
                 //Frm_Client.lst_messagesFromServer_model.addElement(message);
