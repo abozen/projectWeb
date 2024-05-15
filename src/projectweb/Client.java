@@ -8,7 +8,6 @@ package projectweb;
  *
  * @author abozen
  */
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -19,6 +18,7 @@ import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 
 public class Client implements Runnable {
+
     String username;
     // her clientın bir soketi olamlı
     private Socket socket;
@@ -32,15 +32,13 @@ public class Client implements Runnable {
     // port numarası
     private int port;
     boolean isListening = false;
-    
+
     fLogin loginFrame = null;
     fMenu menuFrame = null;
     fProject projectFrame = null;
-    
+
     String[][] projectInfos = null;
     public DefaultListModel<String> listModel;
-   
-    
 
     //yapıcı metod
     public Client(String server, int port, String username, fLogin loginFrame) {
@@ -49,15 +47,21 @@ public class Client implements Runnable {
         this.port = port;
         this.loginFrame = loginFrame;
 
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                // Program kapatıldığında socket bağlantısını kapat
+                System.out.println("program shutting down");
+                disconnect();
+            }
+        });
+
     }
-    
-    public void setMenuFrame(fMenu menuFrame)
-    {
-       this.menuFrame = menuFrame;
+
+    public void setMenuFrame(fMenu menuFrame) {
+        this.menuFrame = menuFrame;
     }
-    
-    public void setProjectFrame(fProject projectFrame)
-    {
+
+    public void setProjectFrame(fProject projectFrame) {
         this.projectFrame = projectFrame;
     }
 
@@ -96,40 +100,42 @@ public class Client implements Runnable {
                 byte[] messageByte = new byte[1024];
                 int bytesRead = sInput.read(messageByte);
                 String message = new String(messageByte, 0, bytesRead);
-                System.out.println("client side: "+message);
-                if(message.startsWith("!!login+")){
+                System.out.println("client side: " + message);
+                if (message.startsWith("!!login+")) {
                     int id = Integer.parseInt(message.split(":")[1]);
                     loginFrame.login(id);
-                }else if(message.startsWith("!!projectList"))
-                {
+                } else if (message.startsWith("!!projectList")) {
                     String projectMsg = message.substring(14);
                     projectInfos = getProjectInfos(projectMsg);
                     listModel = getProjectList(projectInfos);
                     menuFrame.setProjectList(listModel, projectInfos);
-                }else if(message.startsWith("!!createProject"))
-                {
+                } else if (message.startsWith("!!createProject")) {
                     String[] splittedMsg = message.split(":");
                     String projectName = splittedMsg[1];
                     String projectKey = splittedMsg[2];
                     menuFrame.projectCreated(projectName, projectKey);
-                }else if(message.startsWith("!!joinProject")){
+                } else if (message.startsWith("!!joinProject")) {
                     String[] splittedMsg = message.split(":");
                     boolean isJoined = false;
-                    if(splittedMsg[1].equals("true"))
+                    if (splittedMsg[1].equals("true")) {
                         isJoined = true;
+                    }
                     menuFrame.joinedProject(isJoined);
-                }else if(message.startsWith("!!activeMembers"))
-                {
+                } else if (message.startsWith("!!activeMembers")) {
                     String[] splittedMsg = message.split(":");
                     String[] names = new String[splittedMsg.length - 1];
                     for (int i = 0; i < names.length; i++) {
                         names[i] = splittedMsg[i + 1];
                     }
                     projectFrame.setActiveMembers(names);
+                } else if(message.startsWith("!!BROADCAST"))
+                {
+                    String[] splittedMsg = message.split(":");
+                    String chatMsg = splittedMsg[1];
+                    projectFrame.writeChatMessage(chatMsg);
                 }
-                
-                //Frm_Client.lst_messagesFromServer_model.addElement(message);
 
+                //Frm_Client.lst_messagesFromServer_model.addElement(message);
             }
 
         } catch (IOException ex) {
@@ -152,8 +158,8 @@ public class Client implements Runnable {
     //clientı kapatan fonksiyon
     public void disconnect() {
         try {
-            String disconnect = "!!DISCONNECT";
-            SendMessage(disconnect.getBytes());
+            String message = "!!DISCONNECT:"+loginFrame.currentUserID;
+            SendMessage(message.getBytes());
             //tüm nesneleri kapatıyoruz
             if (sInput != null) {
                 sInput.close();
@@ -175,10 +181,10 @@ public class Client implements Runnable {
     private String[][] getProjectInfos(String projectMsg) {
         System.out.println(projectMsg);
         String[] infos = projectMsg.split(":");
-        String[][] projectInfos = new String[infos.length/4][4];
-        for (int i = 0; i < infos.length/4; i++) {
+        String[][] projectInfos = new String[infos.length / 4][4];
+        for (int i = 0; i < infos.length / 4; i++) {
             for (int j = 0; j < 4; j++) {
-                projectInfos[i][j] = infos[i*4 + j];
+                projectInfos[i][j] = infos[i * 4 + j];
             }
         }
         return projectInfos;
@@ -187,8 +193,9 @@ public class Client implements Runnable {
     private DefaultListModel<String> getProjectList(String[][] projectInfos) {
         DefaultListModel<String> model = new DefaultListModel<>();
         for (int i = 0; i < projectInfos.length; i++) {
-             model.addElement(projectInfos[i][2]);
+            model.addElement(projectInfos[i][2]);
         }
+
         return model;
     }
 

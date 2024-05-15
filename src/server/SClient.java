@@ -65,8 +65,8 @@ public class SClient extends Thread {
             username = message;
             System.out.println(message);
             //Frm_Server.lst_clients_model.addElement(username);
-            String log = "!! " + username + " is in chat";
-            server.SendBroadCastMessage(log.getBytes());
+            //String log = "!! " + username + " is in chat";
+            //server.SendBroadCastMessage(log.getBytes());
             //Frm_Server.lst_messagesFromClient_model.addElement(log);
 
         } catch (IOException ex) {
@@ -89,9 +89,7 @@ public class SClient extends Thread {
                     Disconnect();
                     break;
                 } else if (message.startsWith("!!BROADCAST")) {
-                    String log = username + " -> " + message;
-                    server.SendBroadCastMessage(log.getBytes());
-                    //Frm_Server.lst_messagesFromClient_model.addElement(log);//this.socket.getPort() + "->" + message); 
+                    broadcast(message);
                 } else if (message.startsWith("!!PRIVATE")) {
                     String messageTo = message.split(":")[1];
                     message = message.substring(11 + messageTo.length());
@@ -122,6 +120,8 @@ public class SClient extends Thread {
                             break;
 
                     }
+                } else if (message.startsWith("!!DISCONNECT")) {
+                    Disconnect();
                 }
 
             }
@@ -152,7 +152,7 @@ public class SClient extends Thread {
             this.sInput.close();
             this.sOutput.close();
             this.server.DicconnectClient(this);
-            System.out.println("disconnected");
+            System.out.println("disconnected " + id);
             //Frm_Server.lst_messagesFromClient_model.addElement(" !! " + username + " has left");
             //Frm_Server.lst_clients_model.removeElement(username);
 
@@ -255,7 +255,7 @@ public class SClient extends Thread {
 
             ResultSet rs = st.executeQuery(query);
             if (rs.next()) {
-                
+
                 int userID = rs.getInt("user_id"); // Kullanıcı id al
                 this.id = userID;
                 System.out.println("success");
@@ -302,31 +302,43 @@ public class SClient extends Thread {
         server.SendMessage(sendMsg.getBytes(), this.id);
     }
 
-    private void activeMembersQuery(String message) {
+    private ArrayList<Integer> activeMembersQuery(String message) {
         String[] splittedMsg = message.split(":");
         int projectID = Integer.parseInt(splittedMsg[2]);
         ArrayList<Integer> userIDs = sql.getUserIDsForProject(projectID);
         ArrayList<Integer> activeUserIDs = new ArrayList<Integer>();
         for (int id : userIDs) {
             for (SClient client : server.clientList) {
-                if(id == client.id && client.isClientConnected())
-                {
+                if (id == client.id && client.isClientConnected()) {
                     activeUserIDs.add(id);
                 }
             }
         }
         String names = "";
-        for(int id : activeUserIDs)
-        {
+        for (int id : activeUserIDs) {
             names += sql.getUsername(id);
             names += ":";
         }
-        
-        String sendMsg = "!!activeMembers:"+names;
+
+        String sendMsg = "!!activeMembers:" + names;
         server.SendMessage(sendMsg.getBytes(), this.id);
+
+        return activeUserIDs;
         //String activeMembers = sql.getUsernamesForProject(projectID);
-       // String sendMsg = "!!activeMembers:"+activeMembers;
+        // String sendMsg = "!!activeMembers:"+activeMembers;
         //server.SendMessage(sendMsg.getBytes(), this.id);
+    }
+
+    private void broadcast(String message) {
+        String[] splittedMsg = message.split(":");
+        int userID = Integer.parseInt(splittedMsg[1]);
+        int currentProjectID = Integer.parseInt(splittedMsg[2]);
+        String chatMsg = splittedMsg[3];
+        String username = sql.getUsername(userID);
+        ArrayList<Integer> activeUserIDs = activeMembersQuery("x:x:" + currentProjectID);
+        String log = "!!BROADCAST:" + username + " -> " + chatMsg;
+        server.SendBroadCastMessage(log.getBytes(), activeUserIDs);
+        //Frm_Server.lst_messagesFromClient_model.addElement(log);//this.socket.getPort() + "->" + message);
     }
 
 }

@@ -27,7 +27,7 @@ public class fLogin extends javax.swing.JFrame {
     static boolean savedShow = false;
     static boolean isChecked1 = false;
     static boolean isChecked2 = false;
-    String ip = "172.20.18.161";
+    String ip = "192.168.1.119";
     int port = 5002;
     public Client client = new Client(ip, port, "XX", this);
 

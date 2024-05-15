@@ -122,10 +122,16 @@ public class Server extends Thread {
 
     }
 
-    public void SendBroadCastMessage(byte[] msg) {
+    public void SendBroadCastMessage(byte[] msg, ArrayList<Integer> activeUserIDs) {
         for (SClient sClient : this.clientList) {
-            msg[msg.length - 1] = 0x14;
-            sClient.SendMessage(msg);
+            //msg[msg.length - 1] = 0x14;
+            for (int id : activeUserIDs) {
+                if(id == sClient.id)
+                {
+                    sClient.SendMessage(msg);
+                }
+            }
+            
         }
     }
 

@@ -19,29 +19,36 @@ public class fProject extends javax.swing.JFrame {
     static Client client;
     static int projectID;
     static String projectName;
-    
+
     public fProject(int currentUserID, Client client, int projectID, String projectName) {
         initComponents();
         this.currentUserID = currentUserID;
         this.client = client;
         this.projectID = projectID;
         this.projectName = projectName;
+        projectName_label.setText(projectName);
         listActiveMembers();
     }
-    
-    private void listActiveMembers()
-    {
-        String message = "!!QUERY:activeMembers:"+ projectID;
+
+    private void listActiveMembers() {
+        String message = "!!QUERY:activeMembers:" + projectID;
         client.SendMessage(message.getBytes());
     }
-    
-    public void setActiveMembers(String[] usernames){
+
+    public void setActiveMembers(String[] usernames) {
         System.out.println("modeling");
         DefaultListModel<String> model = new DefaultListModel<>();
         for (int i = 0; i < usernames.length; i++) {
             model.addElement(usernames[i]);
         }
         activeMembers_list.setModel(model);
+    }
+    
+    public void writeChatMessage(String message)
+    {
+        String chat = chatbox.getText();
+        chat += "\n"+ message;
+        chatbox.setText(chat);
     }
 
     /**
@@ -53,7 +60,7 @@ public class fProject extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel1 = new javax.swing.JLabel();
+        projectName_label = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         activeMembers_list = new javax.swing.JList<>();
         jScrollPane3 = new javax.swing.JScrollPane();
@@ -64,14 +71,15 @@ public class fProject extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         jScrollPane4 = new javax.swing.JScrollPane();
         chatbox = new javax.swing.JTextArea();
+        b_refresh = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel1.setFont(new java.awt.Font("Helvetica Neue", 1, 18)); // NOI18N
-        jLabel1.setText("project name");
-        jLabel1.setToolTipText("");
-        getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 20, 190, 20));
+        projectName_label.setFont(new java.awt.Font("Helvetica Neue", 1, 18)); // NOI18N
+        projectName_label.setText("project name");
+        projectName_label.setToolTipText("");
+        getContentPane().add(projectName_label, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 20, 190, 20));
 
         activeMembers_list.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
@@ -89,6 +97,11 @@ public class fProject extends javax.swing.JFrame {
         getContentPane().add(jScrollPane3, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 270, 250, 60));
 
         b_send.setText("Send Message");
+        b_send.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                b_sendActionPerformed(evt);
+            }
+        });
         getContentPane().add(b_send, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 350, -1, -1));
 
         jLabel2.setText("Active Members");
@@ -109,8 +122,29 @@ public class fProject extends javax.swing.JFrame {
 
         getContentPane().add(jScrollPane4, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 90, 250, 170));
 
+        b_refresh.setText("Refresh");
+        b_refresh.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                b_refreshActionPerformed(evt);
+            }
+        });
+        getContentPane().add(b_refresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 20, -1, -1));
+
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void b_refreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_b_refreshActionPerformed
+        // TODO add your handling code here:
+        listActiveMembers();
+    }//GEN-LAST:event_b_refreshActionPerformed
+
+    private void b_sendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_b_sendActionPerformed
+        // TODO add your handling code here:
+        String message = chat_txt.getText();
+        String query = "!!BROADCAST:" + currentUserID + ":" + projectID + ":" + message;
+        client.SendMessage(query.getBytes());
+        chat_txt.setText("");
+    }//GEN-LAST:event_b_sendActionPerformed
 
     /**
      * @param args the command line arguments
@@ -149,15 +183,16 @@ public class fProject extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JList<String> activeMembers_list;
+    private javax.swing.JButton b_refresh;
     private javax.swing.JButton b_send;
     private javax.swing.JTextArea chat_txt;
     private javax.swing.JTextArea chatbox;
     private javax.swing.JButton jButton1;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JLabel projectName_label;
     // End of variables declaration//GEN-END:variables
 }
