@@ -13,8 +13,10 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DefaultListModel;
 
 public class Client implements Runnable {
     String username;
@@ -30,7 +32,13 @@ public class Client implements Runnable {
     // port numarası
     private int port;
     boolean isListening = false;
+    
     fLogin loginFrame = null;
+    fMenu menuFrame = null;
+    
+    String[][] projectInfos = null;
+    public DefaultListModel<String> listModel;
+    
 
     //yapıcı metod
     public Client(String server, int port, String username, fLogin loginFrame) {
@@ -39,6 +47,11 @@ public class Client implements Runnable {
         this.port = port;
         this.loginFrame = loginFrame;
 
+    }
+    
+    public void setMenuFrame(fMenu menuFrame)
+    {
+       this.menuFrame = menuFrame;
     }
 
     // client başlatma
@@ -80,6 +93,18 @@ public class Client implements Runnable {
                 if(message.startsWith("!!login+")){
                     int id = Integer.parseInt(message.split(":")[1]);
                     loginFrame.login(id);
+                }else if(message.startsWith("!!projectList"))
+                {
+                    String projectMsg = message.substring(14);
+                    projectInfos = getProjectInfos(projectMsg);
+                    listModel = getProjectList(projectInfos);
+                    menuFrame.setProjectList(listModel);
+                }else if(message.startsWith("!!createProject"))
+                {
+                    String[] splittedMsg = message.split(":");
+                    String projectName = splittedMsg[1];
+                    String projectKey = splittedMsg[2];
+                    menuFrame.projectCreated(projectName, projectKey);
                 }
                 
                 //Frm_Client.lst_messagesFromServer_model.addElement(message);
@@ -124,6 +149,26 @@ public class Client implements Runnable {
             System.out.println(err.getMessage());
         }
 
+    }
+
+    private String[][] getProjectInfos(String projectMsg) {
+        System.out.println(projectMsg);
+        String[] infos = projectMsg.split(":");
+        String[][] projectInfos = new String[infos.length/4][4];
+        for (int i = 0; i < infos.length/4; i++) {
+            for (int j = 0; j < 4; j++) {
+                projectInfos[i][j] = infos[i*4 + j];
+            }
+        }
+        return projectInfos;
+    }
+
+    private DefaultListModel<String> getProjectList(String[][] projectInfos) {
+        DefaultListModel<String> model = new DefaultListModel<>();
+        for (int i = 0; i < projectInfos.length; i++) {
+             model.addElement(projectInfos[i][2]);
+        }
+        return model;
     }
 
 }

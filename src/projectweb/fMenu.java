@@ -27,119 +27,33 @@ public class fMenu extends javax.swing.JFrame {
      * Creates new form fMenu
      */
     private static int currentUserID;
-    
-    public fMenu(int currentUserID) {
+    static fLogin loginFrame = null;
+    static Client client = null;
+
+    public fMenu(int currentUserID, fLogin loginFrame, Client client) {
         this.currentUserID = currentUserID;
+        this.loginFrame = loginFrame;
+        this.client = client;
+        resetProjectList();
         initComponents();
         // fMenu penceresini oluştur
-        
-        
-        // users_projects tablosunu sorgulayarak kullanıcıya ait proje kimliklerini al
-        List<Integer> projectIDs = getProjectIDsForUser(currentUserID);  
-        // Elde edilen projeleri proje nesenesi oalrak listele
-        List<Project> projects = getProjects(projectIDs);
-        // Elde edilen proje isimlerini JList'e atayarak göster
-        displayProjectNames(projects);
+
     }
 
-    private List<Integer> getProjectIDsForUser(int userID) {
-        List<Integer> projectIDs = new ArrayList<>();
-        
-        Connection con = null;
-        Statement st = null;
-        ResultSet rs = null;
-
-        try {
-            con = DriverManager.getConnection("jdbc:derby://localhost:1527/shopmedb;create=true");
-            st = con.createStatement();
-
-            String query = "SELECT project_id FROM users_projects WHERE user_id = " + userID;
-            rs = st.executeQuery(query);
-
-            while (rs.next()) {
-                int projectID = rs.getInt("project_id");
-                projectIDs.add(projectID);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            // Kaynakları kapat
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (st != null) {
-                    st.close();
-                }
-                if (con != null) {
-                    con.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return projectIDs;
-    }
-    
-    public Project getProjectInfo(int projectID) {
-        Connection con = null;
-        Statement st = null;
-        ResultSet rs = null;
-        Project project = new Project();
-        try {
-            con = DriverManager.getConnection("jdbc:derby://localhost:1527/shopmedb;create=true");
-            st = con.createStatement();
-            String query = "SELECT * FROM projects WHERE project_id = " + projectID;
-            rs = st.executeQuery(query);
-
-            if (rs.next()) {
-                String projectName = rs.getString("project_name");
-                String projectKey = rs.getString("project_key");
-                int adminID = rs.getInt("admin_id");
-                
-                
-                project.admin_id = adminID;
-                project.project_id = projectID;
-                project.project_key = projectKey;
-                project.project_name = projectName;
-                
-            } else {
-                System.out.println("Belirtilen proje kimliğine sahip proje bulunamadı.");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            // Kaynakları kapat
-            try {
-                if (rs != null) rs.close();
-                if (st != null) st.close();
-                if (con != null) con.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return project;
-    }
-    
-    List<Project> getProjects(List<Integer> projectIDs)
-    {
-        List<Project> projects = new ArrayList<>();
-        for(int projectID :  projectIDs)
-        {
-            projects.add(getProjectInfo(projectID));
-        }
-        return  projects;
-    }
-
-    private void displayProjectNames(List<Project> projects) {
-        DefaultListModel<String> model = new DefaultListModel<>();
-        for (Project project : projects) {
-            model.addElement(project.project_name);
-        }
+    public void setProjectList(DefaultListModel<String> model) {
         list_projects.setModel(model);
     }
-    
+
+    public void projectCreated(String projectName, String projectKey) {
+        String log = "A project named " + projectName + " is created. Project Key is : " + projectKey;
+        JOptionPane.showMessageDialog(null, log);
+        resetProjectList();
+    }
+
+    public void resetProjectList() {
+        String listMessage = "!!QUERY:projectList:" + currentUserID;
+        client.SendMessage(listMessage.getBytes());
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -215,12 +129,13 @@ public class fMenu extends javax.swing.JFrame {
         // TODO add your handling code here:
         ProjectCreation pc = new ProjectCreation();
         String projectName = txt_projectName.getText();
-        String projectKey = pc.createNewProject(projectName, currentUserID);
-        String log = "A project named " + projectName + " is created. Project Key is : " + projectKey;
-        JOptionPane.showMessageDialog(null, log);
-        this.invalidate();
-        this.validate();
-        this.repaint();
+        String message = "!!QUERY:createProject:" + currentUserID + ":" + projectName;
+        client.SendMessage(message.getBytes());
+
+        //String projectKey = pc.createNewProject(projectName, currentUserID);
+        //String log = "A project named " + projectName + " is created. Project Key is : " + projectKey;
+        //JOptionPane.showMessageDialog(null, log);
+
     }//GEN-LAST:event_b_newProject1ActionPerformed
 
     private void b_joinProject1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_b_joinProject1ActionPerformed
@@ -269,7 +184,7 @@ public class fMenu extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new fMenu(currentUserID).setVisible(true);
+                new fMenu(currentUserID, loginFrame, client).setVisible(true);
             }
         });
     }

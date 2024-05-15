@@ -27,9 +27,9 @@ public class fLogin extends javax.swing.JFrame {
     static boolean savedShow = false;
     static boolean isChecked1 = false;
     static boolean isChecked2 = false;
-    String ip = "192.168.1.108";
+    String ip = "172.20.18.161";
     int port = 5002;
-    Client client = new Client(ip, port, "XX", this);
+    public Client client = new Client(ip, port, "XX", this);
 
     public fLogin() {
         initComponents();
@@ -39,7 +39,8 @@ public class fLogin extends javax.swing.JFrame {
     
     public void login(int id)
     {
-        fMenu menuFrame = new fMenu(id);
+        fMenu menuFrame = new fMenu(id, this, this.client);
+        client.setMenuFrame(menuFrame);
         menuFrame.setVisible(true);
         this.setVisible(false);
     }

@@ -35,6 +35,8 @@ public class SClient extends Thread {
 
     public boolean isListening = false;
 
+    SQL_Operations sql = new SQL_Operations();
+
     //yapıcı metod
     public SClient(Socket socket, Server server) {
 
@@ -170,7 +172,7 @@ public class SClient extends Thread {
         int id = Integer.parseInt(splittedMsg[2]);
         String username = splittedMsg[3];
         String password = splittedMsg[4];
-        
+
         Connection con = null;
         Statement st = null;
 
@@ -180,7 +182,6 @@ public class SClient extends Thread {
             st = con.createStatement();
 
             // Aynı kullanıcı adıyla kayıtlı bir kullanıcının olup olmadığını kontrol et
-            
             String checkQuery = "SELECT * FROM users WHERE username = '" + username + "'";
             ResultSet checkResult = st.executeQuery(checkQuery);
 
@@ -230,7 +231,7 @@ public class SClient extends Thread {
         String[] splittedMsg = message.split(":");
         String username = splittedMsg[2];
         String password = splittedMsg[3];
-         try {
+        try {
 
             Connection con = DriverManager.getConnection("jdbc:derby://localhost:1527/shopmedb;create=true");
             Statement st = con.createStatement();
@@ -241,10 +242,10 @@ public class SClient extends Thread {
             if (rs.next()) {
                 int userID = rs.getInt("user_id"); // Kullanıcı id al
                 System.out.println("success");
-                String msg = "!!login+:"+ userID;
+                String msg = "!!login+:" + userID;
                 System.out.println(msg);
                 server.SendMessage(msg.getBytes(), this.id);
-                
+
             } else {
                 System.out.println("fail");
             }
@@ -257,12 +258,22 @@ public class SClient extends Thread {
 
     private void projectListQuery(String message) {
         String[] splittedMsg = message.split(":");
-        String username = splittedMsg[2];
+        int userID = Integer.parseInt(splittedMsg[2]);
+        //String username = splittedMsg[2];
+        //int userID = sql.getUserIDFromUsername(username);
+        String projectList = sql.getUserProjectsInfo(userID);
+        String sendMsg = "!!projectList:" + projectList;
+        server.SendMessage(sendMsg.getBytes(), this.id);
+
     }
 
     private void createProjectQuery(String message) {
         String[] splittedMsg = message.split(":");
-        String username = splittedMsg[2];
+        int userID = Integer.parseInt(splittedMsg[2]);
+        String projectName = splittedMsg[3];
+        String projectKey = sql.createNewProject(projectName, userID);
+        String sendMsg = "!!createProject:" + projectName + ":" + projectKey;
+        server.SendMessage(sendMsg.getBytes(), this.id);
     }
 
     private void joinProjectQuery(String message) {
