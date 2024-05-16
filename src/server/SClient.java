@@ -256,13 +256,17 @@ public class SClient extends Thread {
 
                 int userID = rs.getInt("user_id"); // Kullanıcı id al
                 this.id = userID;
-                System.out.println("success");
+                System.out.println("login success");
                 String msg = "!!login+:" + userID;
                 System.out.println(msg);
                 server.SendMessage(msg.getBytes(), this.id);
 
             } else {
-                System.out.println("fail");
+                System.out.println(" login fail ");
+                String msg = "!!login-:";
+                System.out.println(msg);
+                server.SendMessage(msg.getBytes(), this.id);
+
             }
 
         } catch (HeadlessException | SQLException E) {
@@ -277,6 +281,7 @@ public class SClient extends Thread {
         //String username = splittedMsg[2];
         //int userID = sql.getUserIDFromUsername(username);
         String projectList = sql.getUserProjectsInfo(userID);
+        System.out.println("projectList: " + projectList);
         String sendMsg = "!!projectList:" + projectList;
         server.SendMessage(sendMsg.getBytes(), this.id);
 

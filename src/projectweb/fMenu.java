@@ -31,12 +31,13 @@ public class fMenu extends javax.swing.JFrame {
     static Client client = null;
     String[][] projectInfos;
 
-    public fMenu(int currentUserID, fLogin loginFrame, Client client) {
+    public fMenu(int currentUserID,  Client client) {
+        initComponents();
         this.currentUserID = currentUserID;
-        this.loginFrame = loginFrame;
+        
         this.client = client;
         resetProjectList();
-        initComponents();
+        
         // fMenu penceresini oluştur
 
     }
@@ -96,6 +97,11 @@ public class fMenu extends javax.swing.JFrame {
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         b_back.setText("Back");
+        b_back.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                b_backActionPerformed(evt);
+            }
+        });
         getContentPane().add(b_back, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 70, 30));
 
         b_newProject1.setText("New Project");
@@ -191,13 +197,22 @@ public class fMenu extends javax.swing.JFrame {
         String projectName = projectInfos[selectedProject][2];
         int adminID = Integer.parseInt(projectInfos[selectedProject][3]);
         
-        fProject projectFrame = new fProject(currentUserID, this.client, projectID, projectName);
+        fProject projectFrame = new fProject(currentUserID, this.client, projectID, projectName, projectKey);
         client.setProjectFrame(projectFrame);
         projectFrame.setVisible(true);
         this.setVisible(false);
+        this.dispose();
         
         
     }//GEN-LAST:event_b_openProject1ActionPerformed
+
+    private void b_backActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_b_backActionPerformed
+        // TODO add your handling code here:
+        client.disconnect();
+        fLogin loginFrame = new fLogin();
+        loginFrame.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_b_backActionPerformed
 
     /**
      * @param args the command line arguments
@@ -229,7 +244,7 @@ public class fMenu extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new fMenu(currentUserID, loginFrame, client).setVisible(true);
+                new fMenu(currentUserID,  client).setVisible(true);
             }
         });
     }

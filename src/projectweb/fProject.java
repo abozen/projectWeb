@@ -19,14 +19,23 @@ public class fProject extends javax.swing.JFrame {
     static Client client;
     static int projectID;
     static String projectName;
+    static String projectKey;
 
-    public fProject(int currentUserID, Client client, int projectID, String projectName) {
+    public fProject(int currentUserID, Client client, int projectID, String projectName, String projectKey) {
         initComponents();
         this.currentUserID = currentUserID;
         this.client = client;
         this.projectID = projectID;
         this.projectName = projectName;
+        this.projectKey = projectKey;
         projectName_label.setText(projectName);
+        if(!projectKey.equals("xx"))
+        {
+            key_label.setVisible(true);
+            key_label.setText("key: " + projectKey);
+        }else
+            key_label.setVisible(false);
+        
         listActiveMembers();
     }
 
@@ -89,6 +98,8 @@ public class fProject extends javax.swing.JFrame {
         chatbox = new javax.swing.JTextArea();
         jScrollPane6 = new javax.swing.JScrollPane();
         chat_txt = new javax.swing.JTextArea();
+        key_label = new javax.swing.JLabel();
+        b_back = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -96,7 +107,7 @@ public class fProject extends javax.swing.JFrame {
         projectName_label.setFont(new java.awt.Font("Helvetica Neue", 1, 18)); // NOI18N
         projectName_label.setText("project name");
         projectName_label.setToolTipText("");
-        getContentPane().add(projectName_label, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 20, 190, 20));
+        getContentPane().add(projectName_label, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 10, 190, 20));
 
         activeMembers_list.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
@@ -147,13 +158,13 @@ public class fProject extends javax.swing.JFrame {
 
         getContentPane().add(jScrollPane4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 220, 180, 150));
 
-        b_refresh.setText("Refresh");
+        b_refresh.setText("refresh");
         b_refresh.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 b_refreshActionPerformed(evt);
             }
         });
-        getContentPane().add(b_refresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 20, -1, -1));
+        getContentPane().add(b_refresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 120, -1, -1));
 
         chatbox.setEditable(false);
         chatbox.setBackground(new java.awt.Color(223, 222, 222));
@@ -172,6 +183,17 @@ public class fProject extends javax.swing.JFrame {
         jScrollPane6.setViewportView(chat_txt);
 
         getContentPane().add(jScrollPane6, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 270, 250, 60));
+
+        key_label.setText("key:");
+        getContentPane().add(key_label, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 10, 100, -1));
+
+        b_back.setText("back");
+        b_back.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                b_backActionPerformed(evt);
+            }
+        });
+        getContentPane().add(b_back, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 20, -1, -1));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -204,6 +226,14 @@ public class fProject extends javax.swing.JFrame {
 
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void b_backActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_b_backActionPerformed
+        // TODO add your handling code here:
+        fMenu menuFrame = new fMenu(currentUserID, this.client);
+        client.setMenuFrame(menuFrame);
+        menuFrame.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_b_backActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -234,13 +264,14 @@ public class fProject extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new fProject(currentUserID, client, projectID, projectName).setVisible(true);
+                new fProject(currentUserID, client, projectID, projectName, projectKey).setVisible(true);
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JList<String> activeMembers_list;
+    private javax.swing.JButton b_back;
     private javax.swing.JButton b_refresh;
     private javax.swing.JButton b_send;
     private javax.swing.JTextArea chat_txt;
@@ -255,6 +286,7 @@ public class fProject extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JScrollPane jScrollPane6;
+    private javax.swing.JLabel key_label;
     private javax.swing.JLabel projectName_label;
     // End of variables declaration//GEN-END:variables
 }

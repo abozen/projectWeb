@@ -39,7 +39,7 @@ public class SQL_Operations {
             // Her proje için ilgili bilgileri al
             while (rs.next()) {
                 int projectID = rs.getInt("project_id");
-                String projectInfo = getProjectInfo(projectID);
+                String projectInfo = getProjectInfo(projectID, userID);
                 if (!projectInfo.isEmpty()) {
                     projectsInfo.append(projectInfo).append(":");
                 }
@@ -71,7 +71,7 @@ public class SQL_Operations {
         return projectsInfo.toString();
     }
 
-    private String getProjectInfo(int projectID) {
+    private String getProjectInfo(int projectID, int userID) {
         StringBuilder projectInfo = new StringBuilder();
 
         Connection con = null;
@@ -88,9 +88,9 @@ public class SQL_Operations {
 
             // Proje bilgilerini dizeye ekleyin
             if (rs.next()) {
-
+                
                 String projectName = rs.getString("project_name");
-                String projectKey = rs.getString("project_key");
+                String projectKey = rs.getInt("admin_id") == userID ? rs.getString("project_key") : "xx";
                 int adminID = rs.getInt("admin_id");
 
                 projectInfo.append(projectID).append(":").append(projectKey).append(":")
@@ -164,7 +164,7 @@ public class SQL_Operations {
         String projectKey = generateRandomKey();
 
         // Mevcut kullanıcıyı admin olarak kabul et ve en yüksek project_id'den bir fazla al
-        int adminUserID = 1; // Örneğin, admin kullanıcı kimliği sabit bir değer olarak alınsın
+        int adminUserID = currentUserID; // Örneğin, admin kullanıcı kimliği sabit bir değer olarak alınsın
         int newProjectID = getNextProjectID();
 
         // Yeni proje bilgilerini projects tablosuna ekle

@@ -104,6 +104,9 @@ public class Client implements Runnable {
                 if (message.startsWith("!!login+")) {
                     int id = Integer.parseInt(message.split(":")[1]);
                     loginFrame.login(id);
+                }else if(message.startsWith("!!login-")){
+                    loginFrame.loginFailed();
+          
                 } else if (message.startsWith("!!projectList")) {
                     String projectMsg = message.substring(14);
                     projectInfos = getProjectInfos(projectMsg);

@@ -39,10 +39,16 @@ public class fLogin extends javax.swing.JFrame {
     
     public void login(int id)
     {
-        fMenu menuFrame = new fMenu(id, this, this.client);
+        fMenu menuFrame = new fMenu(id, this.client);
         client.setMenuFrame(menuFrame);
         menuFrame.setVisible(true);
         this.setVisible(false);
+    }
+    
+    public void loginFailed()
+    {
+        String log = "Fail";
+        JOptionPane.showMessageDialog(null, log);
     }
 
     /**
