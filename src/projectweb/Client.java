@@ -97,7 +97,7 @@ public class Client implements Runnable {
     public void run() {
         try {
             while (this.isListening) {
-                byte[] messageByte = new byte[1024];
+                byte[] messageByte = new byte[128];
                 int bytesRead = sInput.read(messageByte);
                 String message = new String(messageByte, 0, bytesRead);
                 System.out.println("client side: " + message);
@@ -128,11 +128,17 @@ public class Client implements Runnable {
                         names[i] = splittedMsg[i + 1];
                     }
                     projectFrame.setActiveMembers(names);
-                } else if(message.startsWith("!!BROADCAST"))
+                } else if(message.startsWith("!!BROADCAST")) 
                 {
                     String[] splittedMsg = message.split(":");
-                    String chatMsg = splittedMsg[1];
-                    projectFrame.writeChatMessage(chatMsg);
+                    int currentProjectID = Integer.parseInt(splittedMsg[1]);
+                    String chatMsg = splittedMsg[2];
+                    projectFrame.writeChatMessage(chatMsg, currentProjectID);
+                }else if(message.startsWith("!!PRIVATE")){
+                    String[] splittedMsg = message.split(":");
+                    int currentProjectID =Integer.parseInt( splittedMsg[1]);
+                    String chatMsg = splittedMsg[2];
+                    projectFrame.writePrivateMessage(chatMsg, currentProjectID);
                 }
 
                 //Frm_Client.lst_messagesFromServer_model.addElement(message);

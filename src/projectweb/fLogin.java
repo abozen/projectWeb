@@ -27,7 +27,7 @@ public class fLogin extends javax.swing.JFrame {
     static boolean savedShow = false;
     static boolean isChecked1 = false;
     static boolean isChecked2 = false;
-    String ip = "192.168.1.119";
+    String ip = "172.20.17.162";
     int port = 5002;
     public Client client = new Client(ip, port, "XX", this);
 
@@ -80,7 +80,7 @@ public class fLogin extends javax.swing.JFrame {
         jPanel1.setPreferredSize(new java.awt.Dimension(500, 500));
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel1.setText("E-Mail");
+        jLabel1.setText("Username");
         jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 70, 60, 30));
         jPanel1.add(login_txt1, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 70, 160, 30));
 

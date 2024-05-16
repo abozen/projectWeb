@@ -59,7 +59,7 @@ public class SClient extends Thread {
         this.isListening = true;
         try {
 
-            byte[] messageByte = new byte[31];
+            byte[] messageByte = new byte[128];
             int bytesRead = sInput.read(messageByte);
             String message = new String(messageByte, 0, bytesRead);
             username = message;
@@ -81,7 +81,7 @@ public class SClient extends Thread {
     public void run() {
         try {
             while (this.isListening) {
-                byte[] messageByte = new byte[31];
+                byte[] messageByte = new byte[128];
                 int bytesRead = sInput.read(messageByte);
                 String message = new String(messageByte, 0, bytesRead);
                 System.out.println(message);
@@ -91,10 +91,8 @@ public class SClient extends Thread {
                 } else if (message.startsWith("!!BROADCAST")) {
                     broadcast(message);
                 } else if (message.startsWith("!!PRIVATE")) {
-                    String messageTo = message.split(":")[1];
-                    message = message.substring(11 + messageTo.length());
-                    message = (String) username + " -> " + message;
-                    server.SendMessage(message.getBytes(), findIdFromUsername(messageTo));
+                    privateMsg(message);
+
                 } else if (message.startsWith("!!QUERY")) { // !!QUERY:register:0:aburo:123
                     String type = message.split(":")[1];
                     switch (type) {
@@ -184,9 +182,9 @@ public class SClient extends Thread {
     void registerQuery(String message) {
 
         String[] splittedMsg = message.split(":");
-        int id = Integer.parseInt(splittedMsg[2]);
-        String username = splittedMsg[3];
-        String password = splittedMsg[4];
+        
+        String username = splittedMsg[2];
+        String password = splittedMsg[3];
 
         Connection con = null;
         Statement st = null;
@@ -336,9 +334,23 @@ public class SClient extends Thread {
         String chatMsg = splittedMsg[3];
         String username = sql.getUsername(userID);
         ArrayList<Integer> activeUserIDs = activeMembersQuery("x:x:" + currentProjectID);
-        String log = "!!BROADCAST:" + username + " -> " + chatMsg;
+        String log = "!!BROADCAST:" + currentProjectID + ":" + username + " -> " + chatMsg;
         server.SendBroadCastMessage(log.getBytes(), activeUserIDs);
         //Frm_Server.lst_messagesFromClient_model.addElement(log);//this.socket.getPort() + "->" + message);
+    }
+
+    private void privateMsg(String message) {
+        String[] splittedMsg = message.split(":");
+        int senderID = Integer.parseInt(message.split(":")[1]);
+        String recieverUsername = message.split(":")[2];
+        int projectID = Integer.parseInt(message.split(":")[3]);
+        String chatMsg = message.split(":")[4];
+        String senderUsername = sql.getUsername(senderID);
+        int recieverID = sql.getUserIDFromUsername(recieverUsername);
+        chatMsg = senderUsername + " -> " + chatMsg;
+        String log = "!!PRIVATE:"+ projectID + ":" + chatMsg;
+        server.SendMessage(log.getBytes(), recieverID);
+        server.SendMessage(log.getBytes(), senderID);
     }
 
 }
